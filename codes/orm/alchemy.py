@@ -6,8 +6,13 @@ from sqlalchemy.orm import sessionmaker
 class OrmClassBase:
 
     @classmethod
-    def get_by_id(cls, id):
-        return cls.query.get(id)
+    def get_by_id(cls, id, session):
+        return session.query(cls).get(id)
+
+
+    @classmethod
+    def to_dict(cls, key_field, value_field, session):
+        return {getattr(row, key_field): getattr(row, value_field) for row in session.query(cls)}
 
 
 
