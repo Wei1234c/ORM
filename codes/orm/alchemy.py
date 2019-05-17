@@ -110,18 +110,23 @@ class ModelBuilder:
 
 
     @classmethod
-    def _gen_mapping_strings(cls, db_url):
+    def _gen_mapping_strings(cls, db_url, print_out = True):
         tables = cls.get_tables(db_url)
+        script = ['', 'from sqlalchemy.orm import mapper', '']
 
-        print()
         for i in range(len(tables)):
-            print('{} = tables[{}]'.format(tables[i].name, i))
+            script.append('{} = tables[{}]'.format(tables[i].name, i))
 
-        print()
+        script.append('')
         for t in tables:
-            print('mapper({}, {})'.format(cls._class_name_from_table_name(t.name), t.name))
+            script.append('mapper({}, {})'.format(cls._class_name_from_table_name(t.name), t.name))
 
-        print()
+        script.append('')
+        script = '\n'.join(script)
+        if print_out:
+            print(script)
+
+        return script
 
 
     @classmethod
