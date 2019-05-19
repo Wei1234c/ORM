@@ -59,7 +59,7 @@ class ModelBuilder:
     @classmethod
     def _gen_imports(cls):
         print('from sqlalchemy import create_engine, MetaData, Table')
-        print('from sqlalchemy.orm import mapper, sessionmaker')
+        print('from sqlalchemy.orm import sessionmaker')
         print()
 
 
