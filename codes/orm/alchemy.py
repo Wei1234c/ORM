@@ -1,6 +1,56 @@
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import sessionmaker
 
+from .tools import AttrDict
+
+
+AS_UNDERLINE = ' ()[]{}/:?!,'
+
+
+
+def as_underline(string):
+    for c in AS_UNDERLINE:
+        string = string.replace(c, '_')
+    return string
+
+
+
+def dump_table_as_dict(session, table, key_field_name):
+    dictionary = {}
+
+    for row in session.query(table):
+        key = [getattr(row, col.name) for col in table.columns if col.name == key_field_name][0]
+        fields = {col.name: getattr(row, col.name) for col in table.columns}
+        # dictionary[as_underline(key)] = AttrDict(fields)
+        dictionary[as_underline(key)] = fields
+
+    return AttrDict(dictionary)
+
+
+
+def dump_db_as_dict(db_url, key_field_name):
+    _, _, tables, session = ModelBuilder.get_db_objects(db_url)
+    tree = {table.name: dump_table_as_dict(session, table, key_field_name) for table in tables}
+    return AttrDict(tree)
+
+
+
+def gen_table_dbos(session, orm_class, key_field_name):
+    return AttrDict({as_underline(getattr(dbo, key_field_name)): dbo
+                     for dbo in session.query(orm_class).all()})
+
+
+
+def gen_db_dbos_tree(db_url, key_field_name, local_objects):
+    engine, meta, tables, session = ModelBuilder.get_db_objects(db_url)
+    classes_names = [ModelBuilder._class_name_from_table_name(table.name) for table in tables]
+
+    tree = AttrDict({_class.__name__: gen_table_dbos(session = session,
+                                                     orm_class = _class,
+                                                     key_field_name = key_field_name)
+                     for _class in [local_objects[classe_name] for classe_name in classes_names]})
+    return tree
+
 
 
 class OrmClassBase:
@@ -11,8 +61,10 @@ class OrmClassBase:
 
 
     @classmethod
-    def to_dict(cls, key_field, value_field, session):
-        return {getattr(row, key_field): getattr(row, value_field) for row in session.query(cls)}
+    def to_dict(cls, key_fields, value_fields, session):
+        return {tuple(getattr(row, key_field) for key_field in key_fields):
+                    tuple(getattr(row, value_field) for value_field in value_fields)
+                for row in session.query(cls)}
 
 
 

@@ -1,11 +1,37 @@
+import json
+
+
+
+class _AttrDict(dict):
+
+    def __init__(self, dictionary):
+        super(_AttrDict, self).__init__(**dictionary)
+        self.__dict__ = self
+
+
+
 class AttrDict(dict):
 
     def __init__(self, dictionary):
         super(AttrDict, self).__init__(**dictionary)
-        self.__dict__ = self
+        self.__dict__ = self._parse(dictionary)
 
-        self.keys_values = self
-        self.values_keys = {v: k for k, v in self.keys_values.items()}
 
-    def to_dict(self):
-        return self
+    @classmethod
+    def _parse(cls, dictionary):
+        for k, v in dictionary.items():
+            if isinstance(v, dict):
+                dictionary[k] = cls._parse(v)
+
+        return _AttrDict(dictionary)
+
+
+    def dump(self, fn = 'attr_dict.json'):
+        with open(fn, 'wt') as f:
+            json.dump(self, f)
+
+
+    @classmethod
+    def load(cls, fn = 'attr_dict.json'):
+        with open(fn, 'rt') as f:
+            return AttrDict(json.load(f))
