@@ -31,7 +31,16 @@ class AttrDict(dict):
             json.dump(self, f)
 
 
+    def dumps(self):
+        return json.dumps(self)
+
+
     @classmethod
     def load(cls, fn = 'attr_dict.json'):
         with open(fn, 'rt') as f:
             return AttrDict(json.load(f))
+
+
+    @classmethod
+    def loads(cls, json_str):
+        return AttrDict(json.loads(json_str))
