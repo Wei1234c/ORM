@@ -67,6 +67,11 @@ class OrmClassBase:
                 for row in session.query(cls)}
 
 
+    @property
+    def attributes(self):
+        return self.__dict__
+
+
 
 class ModelBuilder:
     INDENT = '    '
