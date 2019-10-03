@@ -26,12 +26,12 @@ class AttrDict(dict):
         return _AttrDict(dictionary)
 
 
-    def dump(self, fn = 'attr_dict.json'):
-        with open(fn, 'wt') as f:
+    def dump(self, file_name = 'attr_dict.json'):
+        with open(file_name, 'wt') as f:
             json.dump(self, f)
 
 
     @classmethod
-    def load(cls, fn = 'attr_dict.json'):
-        with open(fn, 'rt') as f:
+    def load(cls, file_name = 'attr_dict.json'):
+        with open(file_name, 'rt') as f:
             return cls(json.load(f))
