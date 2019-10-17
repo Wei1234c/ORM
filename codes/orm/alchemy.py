@@ -67,6 +67,12 @@ class OrmClassBase:
                 for row in session.query(cls)}
 
 
+    @classmethod
+    def gen_constants(cls, key_field, value_field, session):
+        d = cls.to_dict([key_field], [value_field], session)
+        return AttrDict({k[0]: v[0] for k, v in d.items()})
+
+
     @property
     def attributes(self):
         return {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
